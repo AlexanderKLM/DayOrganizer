@@ -1,25 +1,46 @@
 package com.example.dayorganizer
 
 import android.os.Bundle
-import android.view.View
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.util.*
-import kotlin.collections.ArrayList
+import com.example.dayorganizer.databinding.ActivityMainBinding
+import androidx.activity.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CardClickListener {
 
-    private lateinit var recyclerView: RecyclerView
-    public lateinit var dataList: ArrayList<CardInfo>
+    private lateinit var binding: ActivityMainBinding
+    private val cardViewModel: CardViewModel by viewModels {
+        CardViewModelFactory((application as CardApplication).repository)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.newCardButton.setOnClickListener{
+            NewCardFragment(null).show(supportFragmentManager, "newcardfragment")
+        }
+        setRecyclerView()
+    }
+
+    private fun setRecyclerView()
+    {
+        val mainActivity = this
+        cardViewModel.cardsInfo.observe(this){
+         binding.recyclerview.apply {
+             layoutManager = LinearLayoutManager(applicationContext)
+             adapter = CardAdapter(it, mainActivity)
+         }
+        }
+    }
+
+    override fun editCard(cardInfo: CardInfo)
+    {
+        NewCardFragment(cardInfo).show(supportFragmentManager,"newcardfragment")
+    }
+
+    override fun completeCard(cardInfo: CardInfo) {
+        TODO("Not yet implemented")
     }
 }

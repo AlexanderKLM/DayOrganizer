@@ -5,31 +5,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.dayorganizer.databinding.CardLayoutBinding
 
-class CardAdapter(private val datalist: ArrayList<CardInfo>): RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
+class CardAdapter(
+    private val cardsInfo: List<CardInfo>,
+    private val clickListener: CardClickListener): RecyclerView.Adapter<CardViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.card_layout,parent, false)
-        return CardViewHolder(itemView)
+        val from = LayoutInflater.from(parent.context)
+        val binding = CardLayoutBinding.inflate(from, parent,false)
+        return CardViewHolder(parent.context, binding, clickListener)
     }
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        val dataitem = datalist[position]
-        holder.cardtitle.text = dataitem.title
-        holder.cardinfo.text = dataitem.desc
-
-        TODO("Not yet implemented")
+       holder.bindCard(cardsInfo[position])
     }
 
     override fun getItemCount(): Int {
-        return datalist.size
-    }
-
-
-    class CardViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
-        val cardtitle:TextView = itemView.findViewById(R.id.TVcardName)
-        val cardinfo:TextView = itemView.findViewById(R.id.TVcardinfo)
-
+        return cardsInfo.size
     }
 
 }

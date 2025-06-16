@@ -13,6 +13,9 @@ interface CardDAO {
     @Query("SELECT * FROM Card ORDER BY id ASC")
     fun allCardsShow(): Flow<List<CardInfo>>
 
+    @Query("SELECT * FROM Card WHERE date = :date ORDER BY time")
+    fun getCardsByDate(date: String): Flow<List<CardInfo>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCard(cardinfo: CardInfo)
 

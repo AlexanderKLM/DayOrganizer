@@ -17,4 +17,12 @@ class CardDBRepository (private val cardDAO: CardDAO){
     suspend fun updateCards(cardInfo: CardInfo){
         cardDAO.updateCards(cardInfo)
     }
+
+    @WorkerThread
+    suspend fun deleteCard(cardInfo: CardInfo) {
+        cardDAO.deleteCard(cardInfo)
+    }
+    fun getCardsByDate(date: String): Flow<List<CardInfo>> {
+        return cardDAO.getCardsByDate(date)
+    }
 }

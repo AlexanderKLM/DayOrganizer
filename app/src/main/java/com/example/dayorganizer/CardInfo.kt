@@ -3,6 +3,9 @@ package com.example.dayorganizer
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Entity(tableName = "Card")
 data class CardInfo(
@@ -11,10 +14,21 @@ data class CardInfo(
     @ColumnInfo(name = "desc") var desc: String,
     @ColumnInfo(name = "date") var date: String?,
     @ColumnInfo(name = "time") var time: String?,
-    @ColumnInfo(name = "prority") var prority: Int,
+    @ColumnInfo(name = "priority") var priority: Int,
     @ColumnInfo(name = "category") var category: String?,
     @ColumnInfo(name = "isDone") var isdone: Boolean,
     @ColumnInfo(name = "isOverDue") var isoverdue: Boolean,
     @ColumnInfo(name = "isRepeating") var isrepeating: Boolean,
     @ColumnInfo(name = "userid") var userid: Int
     )
+{
+    fun dueTime(): LocalTime? = if (time == null) null else LocalTime.parse(time, timeFormatter)
+    fun datefill(): LocalDate? = if (date == null) null else LocalDate.parse(date, dateFormatter)
+
+    companion object {
+        val timeFormatter: DateTimeFormatter = DateTimeFormatter.ISO_TIME
+        val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
+    }
+
+
+}
