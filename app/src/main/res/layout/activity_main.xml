@@ -1,12 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:id="@+id/main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        <Button
+            android:id="@+id/logoutButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Выйти"
+            android:layout_marginTop="16dp"
+            />
+            <TextView
+                android:id="@+id/usernametextview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:text="Helo"
+                android:paddingTop="20dp"
+                android:paddingLeft="20dp"
+                android:layout_gravity="center_horizontal"
+                android:paddingBottom="4dp"/>
+            </LinearLayout>
+
+        <TextView
+            android:id="@+id/calendarHeaderText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Июнь 2025, Понедельник"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="4dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/dateRecyclerView"
@@ -14,7 +56,8 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:orientation="horizontal"
-        android:overScrollMode="never" />
+        android:overScrollMode="never"
+        android:textColor="@color/white"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
@@ -24,13 +67,13 @@
         android:paddingTop="4dp"
         android:paddingBottom="4dp"/>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/newCardButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="+"
-        android:layout_gravity="end"
-        android:layout_margin="20dp"
-        android:backgroundTint="?attr/colorPrimary"
-        android:textColor="?colorOnPrimary"/>
-</LinearLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/newCardButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="20dp"
+            app:srcCompat="@android:drawable/ic_input_add" />
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

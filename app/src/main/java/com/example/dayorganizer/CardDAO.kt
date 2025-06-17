@@ -10,11 +10,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CardDAO {
-    @Query("SELECT * FROM Card ORDER BY id ASC")
-    fun allCardsShow(): Flow<List<CardInfo>>
 
-    @Query("SELECT * FROM Card WHERE date = :date ORDER BY time")
-    fun getCardsByDate(date: String): Flow<List<CardInfo>>
+    @Query("SELECT * FROM Card WHERE date = :date AND userid = :userId ORDER BY priority DESC")
+    fun getCardsByDate(date: String, userId: String): Flow<List<CardInfo>>
+
+    @Query("SELECT * FROM Card WHERE userid = :userId")
+    fun getAllCards(userId: String): Flow<List<CardInfo>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCard(cardinfo: CardInfo)
@@ -24,4 +25,7 @@ interface CardDAO {
 
     @Delete
     suspend fun deleteCard(cardinfo: CardInfo)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(cards: List<CardInfo>)
 }

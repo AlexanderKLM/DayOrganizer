@@ -5,6 +5,8 @@ import android.app.DatePickerDialog
 import android.os.Bundle
 import android.text.Editable
 import android.view.LayoutInflater
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
@@ -12,11 +14,12 @@ import com.example.dayorganizer.databinding.NewCardFragmentBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.time.LocalDate
 import java.time.LocalTime
+import com.google.firebase.auth.FirebaseAuth
 
 class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
     private lateinit var binding: NewCardFragmentBinding
     private lateinit var cardViewModel: CardViewModel
-    private var dueTime: LocalTime? = null
+    private var timefill: LocalTime? = null
     private var datefill: LocalDate? = null
     private var priority: Int = 1
 
@@ -30,8 +33,8 @@ class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
             val editable = Editable.Factory.getInstance()
             binding.cardnamefragment.text = editable.newEditable(cardInfo!!.title)
             binding.carddescfragment.text = editable.newEditable(cardInfo!!.desc)
-            if (cardInfo!!.dueTime() != null) {
-                dueTime = cardInfo!!.dueTime()!!
+            if (cardInfo!!.timefill() != null) {
+                timefill = cardInfo!!.timefill()!!
                 updateTimeButtonText()
             }
             if (cardInfo!!.datefill() != null) {
@@ -77,13 +80,13 @@ class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
     }
 
     private fun openTimePicker() {
-        if (dueTime == null)
-            dueTime = LocalTime.now()
+        if (timefill == null)
+            timefill = LocalTime.now()
         val listener = TimePickerDialog.OnTimeSetListener { _, selectedHour, selectedMinute ->
-            dueTime = LocalTime.of(selectedHour, selectedMinute)
+            timefill = LocalTime.of(selectedHour, selectedMinute)
             updateTimeButtonText()
         }
-        val time = dueTime!!
+        val time = timefill!!
         val dialog = TimePickerDialog(requireContext(), listener, time.hour, time.minute, true)
         dialog.setTitle("Выбрать время")
         dialog.show()
@@ -111,7 +114,7 @@ class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
     }
         private fun updateTimeButtonText() {
             binding.timePickerButton.text =
-                String.format("%02d:%02d", dueTime!!.hour, dueTime!!.minute)
+                String.format("%02d:%02d", timefill!!.hour, timefill!!.minute)
         }
 
         private fun updateDateButtonText() {
@@ -132,7 +135,7 @@ class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
             val title = binding.cardnamefragment.text.toString()
             val desc = binding.carddescfragment.text.toString()
             val cardtime =
-                if (dueTime == null) null else CardInfo.timeFormatter.format(dueTime)
+                if (timefill == null) null else CardInfo.timeFormatter.format(timefill)
             val carddate = datefill?.format(CardInfo.dateFormatter)
             priority = when (binding.priorityGroup.checkedRadioButtonId) {
                 binding.priorityLow.id -> 1
@@ -141,35 +144,41 @@ class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
                 binding.priorityUrgent.id -> 4
                 else -> 1
             }
-            if (cardInfo == null) {
-                val newCard = CardInfo(
-                    id, title, desc, carddate, cardtime,
-                    priority,
-                    category = "В процессе",
-                    isdone = false,
-                    isoverdue = false,
-                    isrepeating = false,
-                    userid = 1
-                )
-                cardViewModel.insertCard(newCard)
-            } else {
-                cardInfo!!.title = title
-                cardInfo!!.desc = desc
-                cardInfo!!.time = cardtime
-                cardInfo!!.date = carddate
 
-                cardViewModel.updateCards(cardInfo!!)
-            }
-            binding.cardnamefragment.setText("")
-            binding.carddescfragment.setText("")
-            dismiss()
-        }
-        private fun deleteCard() {
-            cardInfo?.let {
-                cardViewModel.deleteCard(it)
-            }
-            dismiss()
-        }
 
+            lifecycleScope.launch {
+                if (cardInfo == null) {
+                    val newCard = CardInfo(
+                        0, title, desc, carddate, cardtime,
+                        priority,
+                        category = "В процессе",
+                        isdone = false,
+                        isoverdue = false,
+                        isrepeating = false,
+                        userid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                    )
+                    cardViewModel.insertCard(newCard)
+
+                } else {
+                    cardInfo!!.title = title
+                    cardInfo!!.desc = desc
+                    cardInfo!!.time = cardtime
+                    cardInfo!!.date = carddate
+                    cardInfo!!.priority = priority
+
+                    cardViewModel.updateCards(cardInfo!!)
+
+                }
+                binding.cardnamefragment.setText("")
+                binding.carddescfragment.setText("")
+                dismiss()
+            }
+        }
+            private fun deleteCard() {
+                cardInfo?.let { card ->
+                    cardViewModel.deleteCard(card)
+                }
+                dismiss()
+            }
 
 }

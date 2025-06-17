@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "829475916097",
+    "project_id": "dayorganizer-181e5",
+    "storage_bucket": "dayorganizer-181e5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829475916097:android:038869645c383b8633b9c0",
+        "android_client_info": {
+          "package_name": "com.example.dayorganizer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAnqm9pKu4GgdtVmhoxoctn8-vg4yhPPw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

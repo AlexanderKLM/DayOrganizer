@@ -15,5 +15,6 @@
     <color name="priority_blue">#2A57DB</color>
     <color name="priority_purple">#BB00FF</color>
     <color name="priority_red">#D32D2D</color>
+    <color name="priority_green">#19B719</color>
     <color name="app_background">#121212</color>
 </resources>

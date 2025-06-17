@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/email_register"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="36dp"
+        android:background="@android:color/white"
+        android:textColor="@android:color/black"/>
+
+    <EditText
+        android:id="@+id/password_register"
+        android:hint="Пароль (мин. 6 символов)"
+        android:inputType="textPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="36dp"
+        android:background="@android:color/white"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/confirm_register_button"
+        android:text="Зарегистрироваться"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>

@@ -5,9 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 class CardDBRepository (private val cardDAO: CardDAO){
 
-    val allCardsShow: Flow<List<CardInfo>> = cardDAO.allCardsShow()
-
-
     @WorkerThread
     suspend fun insertCards(cardInfo: CardInfo){
         cardDAO.insertCard(cardInfo)
@@ -22,7 +19,8 @@ class CardDBRepository (private val cardDAO: CardDAO){
     suspend fun deleteCard(cardInfo: CardInfo) {
         cardDAO.deleteCard(cardInfo)
     }
-    fun getCardsByDate(date: String): Flow<List<CardInfo>> {
-        return cardDAO.getCardsByDate(date)
+
+    fun getAllCards(userId: String): Flow<List<CardInfo>> {
+        return cardDAO.getAllCards(userId)
     }
 }
