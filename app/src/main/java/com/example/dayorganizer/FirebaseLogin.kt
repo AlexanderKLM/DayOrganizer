@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.dayorganizer.MainActivity
 import com.example.dayorganizer.databinding.FirebaseLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 

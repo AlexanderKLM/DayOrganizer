@@ -1,6 +1,5 @@
 package com.example.dayorganizer
 
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -65,7 +64,7 @@ class MainActivity : AppCompatActivity(), CardClickListener, OnCardSavedListener
 
         setupCalendarRecyclerView()
         setRecyclerView()
-
+        scheduleCleanupWorker()
 
     }
     override fun onStart() {
@@ -158,11 +157,20 @@ class MainActivity : AppCompatActivity(), CardClickListener, OnCardSavedListener
     }
     override fun onCardSaved(card: CardInfo) {
         Toast.makeText(this, "Задача сохранена: ${card.title}", Toast.LENGTH_SHORT).show()
-        scheduleNotification(card)
+        cardViewModel.scheduleNotification(this, card)
     }
-    private fun scheduleNotification(card: CardInfo) {
-        (cardViewModel::class.java.getDeclaredMethod("scheduleNotification", Context::class.java, CardInfo::class.java)
-            .apply { isAccessible = true })
-            .invoke(cardViewModel, this, card)
+    private fun scheduleCleanupWorker() {
+        val cleanupWorkRequest = PeriodicWorkRequestBuilder<removeOldCardsWorker>(
+            15, TimeUnit.MINUTES
+        )
+            .addTag("Группа очистка")
+            .build()
+
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "Очистка старых карточек",
+            ExistingPeriodicWorkPolicy.KEEP,
+            cleanupWorkRequest
+        )
     }
+
 }

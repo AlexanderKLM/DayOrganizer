@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.*
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -107,7 +106,7 @@ class CardViewModel(private val repository: CardDBRepository) : ViewModel() {
     fun deleteCard(cardInfo: CardInfo) = viewModelScope.launch {
         repository.deleteCard(cardInfo)
     }
-    private fun scheduleNotification(context: Context, card: CardInfo) {
+    fun scheduleNotification(context: Context, card: CardInfo) {
         val date = card.datefill()
         val time = card.timefill()
 

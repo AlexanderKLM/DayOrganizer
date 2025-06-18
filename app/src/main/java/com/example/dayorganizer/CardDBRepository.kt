@@ -25,4 +25,9 @@ class CardDBRepository (private val cardDAO: CardDAO){
         return cardDAO.getAllCards(userId)
     }
 
+    @WorkerThread
+    suspend fun deleteOldCards(fiveMonthsAgoDate: String): Int {
+        return cardDAO.deleteOldCards(fiveMonthsAgoDate)
+    }
+
 }
