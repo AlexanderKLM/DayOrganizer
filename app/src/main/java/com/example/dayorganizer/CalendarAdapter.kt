@@ -14,7 +14,9 @@ class CalendarAdapter(
 
 ) : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>() {
 
-    private var selectedPosition = -1
+    private val today: LocalDate = LocalDate.now()
+    private val todayPosition = dates.indexOfFirst { it.date == today }
+    private var selectedPosition = todayPosition.takeIf { it >= 0 } ?: -1
 
     inner class CalendarViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
 
@@ -44,18 +46,28 @@ class CalendarAdapter(
 
         holder.textView.text = date.dayOfMonth.toString()
 
-        if (adapterPosition == selectedPosition) {
-            holder.textView.setTextColor(Color.BLACK)
-            holder.textView.background = ContextCompat.getDrawable(
-                holder.textView.context,
-                R.drawable.calendar_date_select
-            )
-        } else {
-            holder.textView.setTextColor(Color.WHITE)
-            holder.textView.background = ContextCompat.getDrawable(
-                holder.textView.context,
-                R.drawable.calendar_date_default
-            )
+        when {
+            position == selectedPosition -> {
+                holder.textView.setTextColor(Color.BLACK)
+                holder.textView.background = ContextCompat.getDrawable(
+                    holder.textView.context,
+                    R.drawable.calendar_date_select
+                )
+            }
+            date == today -> {
+                holder.textView.setTextColor(Color.WHITE)
+                holder.textView.background = ContextCompat.getDrawable(
+                    holder.textView.context,
+                    R.drawable.calendar_date_today
+                )
+            }
+            else -> {
+                holder.textView.setTextColor(Color.WHITE)
+                holder.textView.background = ContextCompat.getDrawable(
+                    holder.textView.context,
+                    R.drawable.calendar_date_default
+                )
+            }
         }
 
         holder.textView.setOnClickListener {

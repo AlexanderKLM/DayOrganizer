@@ -16,7 +16,6 @@ data class CardInfo(
     @ColumnInfo(name = "date") var date: String?,
     @ColumnInfo(name = "time") var time: String?,
     @ColumnInfo(name = "priority") var priority: Int,
-    @ColumnInfo(name = "category") var category: String?,
     @ColumnInfo(name = "isDone") var isdone: Boolean,
     @ColumnInfo(name = "isOverDue") var isoverdue: Boolean,
     @ColumnInfo(name = "isRepeating") var isrepeating: Boolean,

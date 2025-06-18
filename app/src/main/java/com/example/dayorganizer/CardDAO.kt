@@ -17,8 +17,8 @@ interface CardDAO {
     @Query("SELECT * FROM Card WHERE userid = :userId")
     fun getAllCards(userId: String): Flow<List<CardInfo>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCard(cardinfo: CardInfo)
+    @Insert
+    suspend fun insert(card: CardInfo): Long
 
     @Update
     suspend fun updateCards(cardinfo: CardInfo)
@@ -28,4 +28,7 @@ interface CardDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(cards: List<CardInfo>)
+
+    @Query("DELETE FROM Card WHERE date  IS NOT NULL < :thresholdDate")
+    suspend fun deleteOldCards(thresholdDate: String): Int
 }

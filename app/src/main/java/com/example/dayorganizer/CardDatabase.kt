@@ -4,32 +4,29 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-
-
-@Database(entities = [CardInfo::class], version = 2, exportSchema = false)
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+@Database(entities = [CardInfo::class], version = 5, exportSchema = false)
 public abstract class CardDatabase : RoomDatabase() {
 
-    abstract fun CardDAO() : CardDAO
+    abstract fun CardDAO(): CardDAO
 
-    companion object
-    {
+    companion object {
         @Volatile
         private var INSTANCE: CardDatabase? = null
 
-        fun getDatabase(context: Context): CardDatabase
-        {
+        fun getDatabase(context: Context): CardDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     CardDatabase::class.java,
                     "Card"
                 )
-                    .fallbackToDestructiveMigration()
+
                     .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
-
 }

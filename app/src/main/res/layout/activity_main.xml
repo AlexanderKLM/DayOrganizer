@@ -16,14 +16,16 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal">
-        <Button
-            android:id="@+id/logoutButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Выйти"
-            android:layout_marginTop="16dp"
-            />
+
+            <Button
+                android:id="@+id/logoutButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="5dp"
+                android:text="Выйти" />
             <TextView
                 android:id="@+id/usernametextview"
                 android:layout_width="wrap_content"
@@ -32,9 +34,8 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:text="Helo"
-                android:paddingTop="20dp"
                 android:paddingLeft="20dp"
-                android:layout_gravity="center_horizontal"
+                android:layout_gravity="center"
                 android:paddingBottom="4dp"/>
             </LinearLayout>
 
@@ -66,14 +67,15 @@
         android:layout_weight="1"
         android:paddingTop="4dp"
         android:paddingBottom="4dp"/>
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/newCardButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="20dp"
-            app:srcCompat="@android:drawable/ic_input_add" />
     </LinearLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/newCardButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:backgroundTint="@color/lavender"
+        app:tint="@android:color/white"
+        app:srcCompat="@android:drawable/ic_input_add" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

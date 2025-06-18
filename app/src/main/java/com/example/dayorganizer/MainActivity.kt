@@ -1,6 +1,8 @@
 package com.example.dayorganizer
 
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.dayorganizer.databinding.ActivityMainBinding
@@ -15,8 +17,15 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import android.Manifest
+import android.widget.Toast
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
 
-class MainActivity : AppCompatActivity(), CardClickListener {
+class MainActivity : AppCompatActivity(), CardClickListener, OnCardSavedListener {
 
     private lateinit var binding: ActivityMainBinding
     private val cardViewModel: CardViewModel by viewModels {
@@ -30,8 +39,13 @@ class MainActivity : AppCompatActivity(), CardClickListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
+        }
+
         binding.newCardButton.setOnClickListener{
-            NewCardFragment(null).show(supportFragmentManager, "newcardfragment")
+            NewCardFragment(null,this).show(supportFragmentManager, "newcardfragment")
         }
 
         binding.logoutButton.setOnClickListener {
@@ -60,6 +74,7 @@ class MainActivity : AppCompatActivity(), CardClickListener {
             val intent = Intent(this, FirebaseLogin::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
+
         }
     }
 
@@ -70,18 +85,23 @@ class MainActivity : AppCompatActivity(), CardClickListener {
 
                     val items = mutableListOf<CardItem>()
 
-                    grouped["В процессе"]?.let {
+                    grouped["В процессе"]?.takeIf { it.isNotEmpty() }?.let {
                         items += CardItem.Header("В процессе")
                         items += it.map { card -> CardItem.Card(card) }
                     }
 
-                    grouped["Выполнено"]?.let {
-                        items += CardItem.Header("Выполнено")
+                    grouped["Срок прошёл"]?.takeIf { it.isNotEmpty() }?.let {
+                        items += CardItem.Header("Срок прошёл")
                         items += it.map { card -> CardItem.Card(card) }
                     }
 
-                    grouped["Срок прошёл"]?.let {
-                        items += CardItem.Header("Срок прошёл")
+                    grouped["Доделать"]?.takeIf { it.isNotEmpty() }?.let {
+                        items += CardItem.Header("Доделать")
+                        items += it.map { card -> CardItem.Card(card) }
+                    }
+
+                    grouped["Выполнено"]?.takeIf { it.isNotEmpty() }?.let {
+                        items += CardItem.Header("Выполнено")
                         items += it.map { card -> CardItem.Card(card) }
                     }
 
@@ -96,7 +116,7 @@ class MainActivity : AppCompatActivity(), CardClickListener {
 
     override fun editCard(cardInfo: CardInfo)
     {
-        NewCardFragment(cardInfo).show(supportFragmentManager,"newcardfragment")
+        NewCardFragment(cardInfo, this).show(supportFragmentManager,"newcardfragment")
     }
 
     override fun completeCard(cardInfo: CardInfo) {
@@ -106,7 +126,13 @@ class MainActivity : AppCompatActivity(), CardClickListener {
 
     private fun setupCalendarRecyclerView() {
         val today = LocalDate.now()
-        val dates = List(30) { CalendarDate(today.plusDays(it.toLong())) }
+        val startDate = today.minusMonths(6)
+        val endDate = today.plusMonths(6)
+        val totalDays = ChronoUnit.DAYS.between(startDate, endDate).toInt() + 1
+
+        val dates = List(totalDays) { index ->
+            CalendarDate(startDate.plusDays(index.toLong()))
+        }
 
         val calendarAdapter = CalendarAdapter(dates) { selectedDate ->
             updateCalendarHeader(selectedDate)
@@ -116,6 +142,10 @@ class MainActivity : AppCompatActivity(), CardClickListener {
         binding.dateRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity, RecyclerView.HORIZONTAL, false)
             adapter = calendarAdapter
+            val todayPosition = dates.indexOfFirst { it.date == today }
+            if (todayPosition >= 0) {
+                scrollToPosition(todayPosition)
+            }
         }
         updateCalendarHeader(today)
         cardViewModel.setFilterDate(today.toString())
@@ -125,5 +155,14 @@ class MainActivity : AppCompatActivity(), CardClickListener {
         val formatter = DateTimeFormatter.ofPattern("LLLL yyyy, EEEE", Locale("ru"))
         val formattedDate = date.format(formatter)
         binding.calendarHeaderText.text = formattedDate.replaceFirstChar { it.uppercase() }
+    }
+    override fun onCardSaved(card: CardInfo) {
+        Toast.makeText(this, "Задача сохранена: ${card.title}", Toast.LENGTH_SHORT).show()
+        scheduleNotification(card)
+    }
+    private fun scheduleNotification(card: CardInfo) {
+        (cardViewModel::class.java.getDeclaredMethod("scheduleNotification", Context::class.java, CardInfo::class.java)
+            .apply { isAccessible = true })
+            .invoke(cardViewModel, this, card)
     }
 }

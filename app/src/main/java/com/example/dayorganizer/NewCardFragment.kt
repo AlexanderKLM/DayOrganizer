@@ -5,10 +5,9 @@ import android.app.DatePickerDialog
 import android.os.Bundle
 import android.text.Editable
 import android.view.LayoutInflater
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.example.dayorganizer.databinding.NewCardFragmentBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -16,7 +15,10 @@ import java.time.LocalDate
 import java.time.LocalTime
 import com.google.firebase.auth.FirebaseAuth
 
-class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
+interface OnCardSavedListener {
+    fun onCardSaved(card: CardInfo)
+}
+class NewCardFragment (var cardInfo: CardInfo?, private val listener: OnCardSavedListener) : BottomSheetDialogFragment() {
     private lateinit var binding: NewCardFragmentBinding
     private lateinit var cardViewModel: CardViewModel
     private var timefill: LocalTime? = null
@@ -64,6 +66,14 @@ class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
                 binding.priorityUrgent.id -> 4
                 else -> 1
             }
+            binding.choosepriority.text = when (priority) {
+                1 -> "Выбранный приоритет: низкий"
+                2 -> "Выбранный приоритет: средний"
+                3 -> "Выбранный приоритет: высокий"
+                4 -> "Выбранный приоритет: срочный"
+                else -> "Выберите приоритет"
+            }
+
         }
         cardInfo?.let {
             when (it.priority) {
@@ -92,6 +102,7 @@ class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
         dialog.show()
 
     }
+
     private fun openDatePicker() {
         if (datefill == null) {
             datefill = LocalDate.now()
@@ -112,73 +123,85 @@ class NewCardFragment (var cardInfo: CardInfo?) : BottomSheetDialogFragment() {
         dialog.setTitle("Выбрать дату")
         dialog.show()
     }
-        private fun updateTimeButtonText() {
-            binding.timePickerButton.text =
-                String.format("%02d:%02d", timefill!!.hour, timefill!!.minute)
+
+    private fun updateTimeButtonText() {
+        binding.timePickerButton.text =
+            String.format("%02d:%02d", timefill!!.hour, timefill!!.minute)
+    }
+
+    private fun updateDateButtonText() {
+        binding.datePickerButton.text = datefill?.format(CardInfo.dateFormatter) ?: "Выбрать дату"
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = NewCardFragmentBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+
+    private fun saveButton() {
+        val title = binding.cardnamefragment.text.toString().trim()
+        val desc = binding.carddescfragment.text.toString().trim()
+        val cardtime = if (timefill == null) null else CardInfo.timeFormatter.format(timefill)
+        val carddate = datefill?.format(CardInfo.dateFormatter)
+
+        if (title.isEmpty() || carddate == null || cardtime == null) {
+            Toast.makeText(
+                requireContext(),
+                "Пожалуйста, заполните все поля",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+        if (timefill == null) null else CardInfo.timeFormatter.format(timefill)
+
+        priority = when (binding.priorityGroup.checkedRadioButtonId) {
+            binding.priorityLow.id -> 1
+            binding.priorityMedium.id -> 2
+            binding.priorityHigh.id -> 3
+            binding.priorityUrgent.id -> 4
+            else -> 1
         }
 
-        private fun updateDateButtonText() {
-            binding.datePickerButton.text = datefill?.format(CardInfo.dateFormatter) ?: "Выбрать дату"
-        }
 
-        override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            binding = NewCardFragmentBinding.inflate(inflater, container, false)
-            return binding.root
-        }
-
-
-        private fun saveButton() {
-            val title = binding.cardnamefragment.text.toString()
-            val desc = binding.carddescfragment.text.toString()
-            val cardtime =
-                if (timefill == null) null else CardInfo.timeFormatter.format(timefill)
-            val carddate = datefill?.format(CardInfo.dateFormatter)
-            priority = when (binding.priorityGroup.checkedRadioButtonId) {
-                binding.priorityLow.id -> 1
-                binding.priorityMedium.id -> 2
-                binding.priorityHigh.id -> 3
-                binding.priorityUrgent.id -> 4
-                else -> 1
-            }
-
-
-            lifecycleScope.launch {
-                if (cardInfo == null) {
-                    val newCard = CardInfo(
-                        0, title, desc, carddate, cardtime,
-                        priority,
-                        category = "В процессе",
-                        isdone = false,
-                        isoverdue = false,
-                        isrepeating = false,
-                        userid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-                    )
-                    cardViewModel.insertCard(newCard)
-
-                } else {
-                    cardInfo!!.title = title
-                    cardInfo!!.desc = desc
-                    cardInfo!!.time = cardtime
-                    cardInfo!!.date = carddate
-                    cardInfo!!.priority = priority
-
-                    cardViewModel.updateCards(cardInfo!!)
-
+        if (cardInfo == null) {
+            val newCard = CardInfo(
+                0, title, desc, carddate, cardtime,
+                priority,
+                isdone = false,
+                isoverdue = false,
+                isrepeating = false,
+                userid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            )
+            cardViewModel.insertCard(newCard, requireContext())
+                .observe(viewLifecycleOwner) { savedCard ->
+                    listener.onCardSaved(savedCard)
                 }
-                binding.cardnamefragment.setText("")
-                binding.carddescfragment.setText("")
-                dismiss()
+        } else {
+            cardInfo!!.title = title
+            cardInfo!!.desc = desc
+            cardInfo!!.time = cardtime
+            cardInfo!!.date = carddate
+            cardInfo!!.priority = priority
+
+            cardViewModel.updateCards(cardInfo!!).also {
+                listener.onCardSaved(cardInfo!!)
             }
         }
-            private fun deleteCard() {
-                cardInfo?.let { card ->
-                    cardViewModel.deleteCard(card)
-                }
-                dismiss()
-            }
+        binding.cardnamefragment.setText("")
+        binding.carddescfragment.setText("")
+        dismiss()
+    }
 
+    private fun deleteCard() {
+        cardInfo?.let { card ->
+            cardViewModel.deleteCard(card)
+        }
+        dismiss()
+    }
 }
+

@@ -5,9 +5,10 @@ import kotlinx.coroutines.flow.Flow
 
 class CardDBRepository (private val cardDAO: CardDAO){
 
+
     @WorkerThread
-    suspend fun insertCards(cardInfo: CardInfo){
-        cardDAO.insertCard(cardInfo)
+    suspend fun insert(cardInfo: CardInfo): Long{
+       return cardDAO.insert(cardInfo)
     }
 
     @WorkerThread
@@ -23,4 +24,5 @@ class CardDBRepository (private val cardDAO: CardDAO){
     fun getAllCards(userId: String): Flow<List<CardInfo>> {
         return cardDAO.getAllCards(userId)
     }
+
 }
